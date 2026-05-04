@@ -42,7 +42,7 @@ python manage.py runserver
 | **Tag**           | slug, label                                                                        | M:N ← TechPost              |
 | **Category**      | slug, label, order                                                                 | 1:N → TechPost              |
 | **TechPost**      | slug, title, subtitle, body, read_minutes, views, license, published_at, edited_at | N:1 → Category, M:N → Tag   |
-| **Comment**       | author_name, body, created_at                                                      | N:1 → TechPost              |
+| **Comment**       | user, author_name, body, created_at                                                | N:1 → TechPost, N:1 → User (nullable) |
 | **DailyCategory** | slug, label, order                                                                 | 1:N → DailyEntry            |
 | **DailyEntry**    | slug, title, title_en, excerpt, published_at                                       | N:1 → DailyCategory         |
 | **Project**       | slug, name, blurb, year, status, tags, external_url, order                         | —                           |
@@ -50,7 +50,8 @@ python manage.py runserver
 | **SkillGroup**    | profile, label, skills                                                             | N:1 → Profile               |
 | **Education**     | profile, period, title, subtitle                                                   | N:1 → Profile               |
 
-> `Comment`는 `User`와 연결하지 않고 `author_name` 문자열만 받습니다.
+> `Comment`는 로그인된 사용자만 작성 가능 (POST 시 `user` FK 자동 연결, `author_name`은 표시 캐시).
+> 기존 익명 댓글(인증 도입 전)은 `user=None`으로 보존돼 `author_name`만 표시됩니다.
 
 ---
 
