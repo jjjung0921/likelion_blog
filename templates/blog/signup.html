@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block title %}회원가입 · {{ BRAND_NAME }}{% endblock %}
+
+{% block content %}
+<div class="login-wrapper">
+  <form class="login-card" method="post" novalidate>
+    {% csrf_token %}
+
+    <header class="auth-card__header">
+      <span class="auth-card__eyebrow">SIGN UP · 회원가입</span>
+      <h1 class="auth-card__h1">처음 오셨네요<span class="accent">.</span></h1>
+      <p class="auth-card__sub">Make a paper to leave notes, save posts, and join the conversation.</p>
+    </header>
+
+    <hr class="note-divider">
+
+    {% if errors %}
+      <ul class="flash flash--list">
+        {% for e in errors %}<li>{{ e }}</li>{% endfor %}
+      </ul>
+    {% endif %}
+
+    <div class="auth-form">
+      <div class="field">
+        <label class="field__label" for="id_name">NAME · 이름</label>
+        <input class="field__input" type="text" name="name" id="id_name"
+               placeholder="Like Lion" value="{{ name }}" required autofocus>
+      </div>
+
+      <div class="field">
+        <label class="field__label" for="id_username">ID</label>
+        <input class="field__input" type="text" name="username" id="id_username"
+               placeholder="babyLion" value="{{ username }}" required>
+      </div>
+
+      <div class="field">
+        <label class="field__label" for="id_password">PASSWORD</label>
+        <input class="field__input" type="password" name="password" id="id_password"
+               placeholder="8자 이상, 영문/숫자 포함" required>
+      </div>
+
+      <label class="auth-card__terms">
+        <input type="checkbox" name="agree" checked>
+        <span class="auth-card__terms-text">
+          <a href="#">이용약관</a>과 <a href="#">개인정보 처리방침</a>에 동의합니다.<br>
+          I agree to the <a href="#">Terms</a> and <a href="#">Privacy Policy</a>.
+        </span>
+      </label>
+
+      <button type="submit" class="btn btn--primary btn--full">Create account →</button>
+    </div>
+
+    <p class="auth-card__alt">
+      이미 계정이 있으신가요? <a href="{% url 'login' %}">Sign in</a>
+    </p>
+  </form>
+</div>
+{% endblock %}

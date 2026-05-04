@@ -595,6 +595,14 @@
   gap: var(--s-12);
   align-items: flex-start;
 }
+.comment-item + .comment-item {
+  margin-top: var(--s-20);
+  padding-top: var(--s-20);
+  background-image: linear-gradient(to right, var(--line-strong) 50%, transparent 0%);
+  background-size: 8px 1px;
+  background-repeat: repeat-x;
+  background-position: top left;
+}
 .comment-item__body { flex: 1; display: flex; flex-direction: column; gap: var(--s-4); }
 .comment-item__header {
   display: flex;
@@ -653,6 +661,7 @@
 }
 
 .btn--full { width: 100%; padding: 12px 16px; }
+.btn--sm { padding: 6px 12px; font-size: 13px; }
 
 /* ---------- Login card ---------- */
 .login-wrapper {
@@ -680,6 +689,84 @@
   color: var(--ink-1);
   letter-spacing: -1%;
 }
+
+/* Auth card (login/signup) — Figma 115:507, 171:660 */
+.auth-card__header { display: flex; flex-direction: column; gap: 4px; }
+.auth-card__eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: var(--ink-3);
+}
+.auth-card__h1 {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--ink-1);
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+}
+.auth-card__sub { margin: 0; font-size: 14px; color: var(--ink-3); line-height: 1.6; }
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-12);
+  margin: 0;  /* 브라우저 기본 form 마진 차단 */
+}
+.auth-card__forgot { text-align: right; line-height: 1; }
+.auth-card__forgot a { font-size: 12px; color: var(--accent-ink); text-decoration: none; }
+.auth-card__forgot a:hover { text-decoration: underline; }
+.auth-card__remember {
+  display: flex;
+  align-items: center;          /* Figma 115:564 items-center */
+  gap: var(--s-8);
+  font-size: 13px;
+  color: var(--ink-2);
+  cursor: pointer;
+}
+.auth-card__terms {
+  display: flex;
+  align-items: flex-start;      /* 약관은 두 줄이라 top-align */
+  gap: var(--s-8);
+  padding-top: 4px;             /* Figma 171:722 pt-[4px] */
+  font-size: 13px;
+  color: var(--ink-2);
+  cursor: pointer;
+}
+.auth-card__remember input[type="checkbox"],
+.auth-card__terms input[type="checkbox"] {
+  appearance: none;
+  flex-shrink: 0;
+  width: 16px; height: 16px;
+  margin: 0;
+  border: 1px solid var(--accent);
+  border-radius: var(--r-sm);
+  background: var(--bg-paper);
+  cursor: pointer;
+  display: inline-grid; place-content: center;
+}
+.auth-card__terms input[type="checkbox"] { margin-top: 2px; }  /* 다중라인 텍스트와 시각 정렬 */
+.auth-card__remember input[type="checkbox"]:checked,
+.auth-card__terms input[type="checkbox"]:checked {
+  background: var(--accent);
+}
+.auth-card__remember input[type="checkbox"]:checked::after,
+.auth-card__terms input[type="checkbox"]:checked::after {
+  content: '✓';
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--bg-paper);
+  line-height: 1;
+}
+.auth-card__terms-text { color: var(--ink-3); line-height: 1.6; }
+.auth-card__terms-text a { color: var(--accent-ink); text-decoration: none; }
+.auth-card__alt { margin: 0; font-size: 13px; color: var(--ink-3); text-align: center; }
+.auth-card__alt a { color: var(--accent-ink); text-decoration: none; font-weight: 500; }
+.auth-card__alt a:hover { text-decoration: underline; }
+.flash--list { list-style: none; margin: 0; padding: var(--s-12) var(--s-16); }
+.flash--list li { font-size: 13px; }
+
 .field { display: flex; flex-direction: column; gap: 6px; }
 .field__label {
   font-family: var(--font-mono);

@@ -55,25 +55,36 @@
         comments · <span data-comment-count>0</span>
       </h2>
 
-      <div class="comment-editor" data-comment-form data-post-slug="{{ post.slug }}">
-        <span class="avatar avatar--32">ME</span>
-        <div class="comment-editor__form">
-          <input type="text" id="comment-author" placeholder="이름"
-                 class="field__input" style="margin-bottom: var(--s-8)">
-          <textarea id="comment-body"
-                    class="comment-editor__textarea"
-                    placeholder="댓글을 남겨주세요…"
-                    rows="3"></textarea>
-          <div class="comment-editor__actions">
-            <button type="button" class="btn btn--primary" data-submit-comment disabled>
-              post →
-            </button>
+      {% if user.is_authenticated %}
+        {# Figma 93:145 — CommentEditor (logged-in) #}
+        <div class="comment-editor" data-comment-form data-post-slug="{{ post.slug }}">
+          <span class="avatar avatar--32">{{ user.first_name|default:user.username|slice:":2"|upper }}</span>
+          <div class="comment-editor__form">
+            <span class="comment-editor__user">{{ user.first_name|default:user.username }}</span>
+            <textarea id="comment-body"
+                      class="comment-editor__textarea"
+                      placeholder="댓글을 남겨주세요…"
+                      rows="2"></textarea>
+            <div class="comment-editor__actions">
+              <button type="button" class="btn btn--primary" data-submit-comment disabled>
+                post →
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      {% else %}
+        {# Figma 121:639 — SignInPrompt (logged-out) #}
+        <div class="signin-prompt">
+          <div class="signin-prompt__text">
+            <span class="signin-prompt__title">댓글을 남기려면 로그인이 필요해요</span>
+            <span class="signin-prompt__sub">Sign in to leave a note on this page.</span>
+          </div>
+          <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn--primary">Sign in →</a>
+        </div>
+      {% endif %}
 
-      <div id="comment-list">
-        {# 비워둠 — 2주차 JS가 fetch로 채움 #}
+      <div id="comment-list" data-post-slug="{{ post.slug }}">
+        {# 비워둠 — JS가 fetch로 채움 (로그인 여부와 무관하게 목록은 표시) #}
       </div>
     </section>
   </article>

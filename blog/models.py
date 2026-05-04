@@ -9,6 +9,7 @@ template에서 접근 방식 예시:
   {{ post.category.label }}     # ForeignKey 관계 (Category 객체 → label 필드)
   {% for tag in post.tags.all %}  # ManyToMany 관계
 """
+from django.conf import settings
 from django.db import models
 from django.urls import reverse
 from django.utils.text import slugify
@@ -78,10 +79,16 @@ class TechPost(models.Model):
 
 class Comment(models.Model):
     """포스트 댓글
-    - 인증 학습 전이라 User에 연결하지 않고, 작성자 이름은 직접 입력받아요.
-    - 누구나 임의 이름으로 댓글 가능 (학습용 단순화).
+    - 인증 도입 후: user FK가 source of truth. author_name은 표시 캐시.
+    - 기존 익명 댓글은 user=None으로 남아있고 author_name으로만 표시.
     """
     post = models.ForeignKey(TechPost, on_delete=models.CASCADE, related_name='comments')
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True, blank=True,
+        on_delete=models.SET_NULL,
+        related_name='comments',
+    )
     author_name = models.CharField(max_length=40)
     body = models.TextField(max_length=500)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -97,8 +104,15 @@ class Comment(models.Model):
         return self.created_at.strftime('%Y.%m.%d')
 
     @property
+    def display_name(self):
+        if self.user_id:
+            return self.user.first_name or self.user.username
+        return self.author_name or 'anonymous'
+
+    @property
     def initials(self):
-        return self.author_name[:2].upper() if self.author_name else 'AN'
+        name = self.display_name
+        return name[:2].upper() if name else 'AN'
 
 
 class DailyCategory(models.Model):

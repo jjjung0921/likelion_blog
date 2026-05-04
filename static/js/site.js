@@ -40,64 +40,66 @@
   // 2주차 — 댓글: fetch + JSON API
   // ===========================================================
 
-  const form = document.querySelector('[data-comment-form]');
-  if (form) {
-    initComments(form);
+  // 댓글 목록은 로그인 여부와 무관하게 표시.
+  // 작성 폼은 로그인 상태에서만 렌더링됨.
+  const listEl = document.getElementById('comment-list');
+  if (listEl && listEl.dataset.postSlug) {
+    initComments(listEl);
   }
 
-  function initComments(form) {
-    const slug = form.dataset.postSlug;
+  function initComments(listEl) {
+    const slug = listEl.dataset.postSlug;
     const apiUrl = '/api/posts/' + slug + '/comments/';
-
-    const author = document.getElementById('comment-author');
-    const body = document.getElementById('comment-body');
-    const submit = form.querySelector('[data-submit-comment]');
-    const listEl = document.getElementById('comment-list');
     const countEl = document.querySelector('[data-comment-count]');
 
-    // 2-A. 페이지 로드 시 GET → 댓글 목록 받아 렌더링
+    // GET → 댓글 목록 받아 렌더링
     fetch(apiUrl)
       .then(function (res) { return res.json(); })
       .then(function (data) {
         listEl.innerHTML = '';
         data.comments.forEach(function (c) { listEl.appendChild(buildComment(c)); });
-        countEl.textContent = data.count;
+        if (countEl) countEl.textContent = data.count;
       })
       .catch(function (err) {
         console.error('failed to load comments', err);
       });
 
-    // 2-B. 입력값에 따라 등록 버튼 활성/비활성
+    // 작성 폼이 없으면 (비로그인 상태) 여기서 종료
+    const form = document.querySelector('[data-comment-form]');
+    if (!form) return;
+
+    const body = document.getElementById('comment-body');
+    const submit = form.querySelector('[data-submit-comment]');
+
+    // 입력값에 따라 등록 버튼 활성/비활성
     function syncButton() {
-      const hasAuthor = author.value.trim().length > 0;
-      const hasBody = body.value.trim().length > 0;
-      submit.disabled = !(hasAuthor && hasBody);
+      submit.disabled = body.value.trim().length === 0;
     }
-    author.addEventListener('input', syncButton);
     body.addEventListener('input', syncButton);
 
-    // 2-C. 등록 버튼 → POST
+    // 등록 버튼 → POST (서버에서 request.user로 작성자 결정)
     submit.addEventListener('click', function () {
-      const payload = {
-        name: author.value.trim(),
-        body: body.value.trim(),
-      };
-      if (!payload.name || !payload.body) return;
+      const text = body.value.trim();
+      if (!text) return;
 
       submit.disabled = true;
       fetch(apiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({ body: text }),
       })
         .then(function (res) {
+          if (res.status === 401) {
+            window.location.href = '/login/?next=' + encodeURIComponent(window.location.pathname);
+            return null;
+          }
           if (!res.ok) throw new Error('server error');
           return res.json();
         })
         .then(function (data) {
+          if (!data) return;
           listEl.appendChild(buildComment(data.comment));
-          countEl.textContent = data.count;
-          author.value = '';
+          if (countEl) countEl.textContent = data.count;
           body.value = '';
           syncButton();
         })

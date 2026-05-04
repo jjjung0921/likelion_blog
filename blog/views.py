@@ -8,6 +8,8 @@ blog/views.py
 """
 import json
 
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.models import User
 from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.csrf import csrf_exempt
@@ -16,6 +18,10 @@ from django.views.decorators.http import require_http_methods
 from .models import (
     Category, Comment, DailyCategory, DailyEntry, Profile, Project, TechPost,
 )
+
+
+# Remember-me: 30일 유지. 미체크 시 브라우저 종료까지만 (set_expiry(0)).
+REMEMBER_ME_SECONDS = 60 * 60 * 24 * 30
 
 
 # ===== Home 화면용 정적 데이터 (디자인에 박혀있는 카피) =====
@@ -215,6 +221,85 @@ def daily_list(request):
     })
 
 
+# ===== 인증 뷰 =====
+
+def login_view(request):
+    """로그인 페이지 (Figma 115:507)"""
+    if request.user.is_authenticated:
+        return redirect('home')
+
+    error = ''
+    username = ''
+    if request.method == 'POST':
+        username = (request.POST.get('username') or '').strip()
+        password = request.POST.get('password') or ''
+        remember = request.POST.get('remember') == 'on'
+
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            # Remember me on this paper — 체크 시 30일, 미체크 시 브라우저 종료까지
+            request.session.set_expiry(REMEMBER_ME_SECONDS if remember else 0)
+            next_url = request.GET.get('next') or request.POST.get('next') or '/'
+            return redirect(next_url)
+        error = '아이디 또는 비밀번호가 올바르지 않아요.'
+
+    return render(request, 'blog/login.html', {
+        'active_nav': '',
+        'page_number': '06 / 07',
+        'error': error,
+        'username': username,
+        'next_url': request.GET.get('next', ''),
+    })
+
+
+def signup_view(request):
+    """회원가입 페이지 (Figma 171:660)"""
+    if request.user.is_authenticated:
+        return redirect('home')
+
+    errors = []
+    name = ''
+    username = ''
+    if request.method == 'POST':
+        name = (request.POST.get('name') or '').strip()
+        username = (request.POST.get('username') or '').strip()
+        password = request.POST.get('password') or ''
+        agreed = request.POST.get('agree') == 'on'
+
+        if not name:
+            errors.append('이름을 입력해주세요.')
+        if not username:
+            errors.append('ID를 입력해주세요.')
+        if len(password) < 8:
+            errors.append('비밀번호는 8자 이상이어야 해요.')
+        if not agreed:
+            errors.append('약관에 동의해주세요.')
+        if username and User.objects.filter(username=username).exists():
+            errors.append('이미 사용 중인 ID에요.')
+
+        if not errors:
+            user = User.objects.create_user(
+                username=username, password=password, first_name=name[:30],
+            )
+            login(request, user)
+            return redirect('home')
+
+    return render(request, 'blog/signup.html', {
+        'active_nav': '',
+        'page_number': '06 / 07',
+        'errors': errors,
+        'name': name,
+        'username': username,
+    })
+
+
+def logout_view(request):
+    """로그아웃 — GET/POST 모두 허용 (헤더 링크에서 호출)"""
+    logout(request)
+    return redirect('home')
+
+
 # ===== 댓글 JSON API (2주차 — fetch + JSON으로 호출) =====
 
 @csrf_exempt  # 학습용으로 CSRF 면제. 운영 환경에서는 토큰 처리 필요.
@@ -222,7 +307,7 @@ def daily_list(request):
 def comments_api(request, slug):
     """
     GET  /api/posts/<slug>/comments/  → 해당 글의 댓글 목록 JSON
-    POST /api/posts/<slug>/comments/  → JSON body {name, body} 받아 댓글 추가, 새 댓글 반환
+    POST /api/posts/<slug>/comments/  → JSON body {body} 받아 댓글 추가 (로그인 필요)
     """
     try:
         post = TechPost.objects.get(slug=slug)
@@ -234,7 +319,7 @@ def comments_api(request, slug):
         return JsonResponse({
             'comments': [
                 {
-                    'name': c.author_name,
+                    'name': c.display_name,
                     'body': c.body,
                     'date': c.date_display,
                 }
@@ -243,25 +328,29 @@ def comments_api(request, slug):
             'count': len(comments),
         })
 
-    # POST
+    # POST — 로그인된 사용자만
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'login required'}, status=401)
+
     try:
         payload = json.loads(request.body.decode('utf-8'))
     except (ValueError, UnicodeDecodeError):
         return JsonResponse({'error': 'invalid JSON'}, status=400)
 
-    name = (payload.get('name') or '').strip()
     body = (payload.get('body') or '').strip()
-    if not name or not body:
-        return JsonResponse({'error': 'name and body are required'}, status=400)
+    if not body:
+        return JsonResponse({'error': 'body is required'}, status=400)
 
+    display_name = request.user.first_name or request.user.username
     comment = Comment.objects.create(
         post=post,
-        author_name=name[:40],
+        user=request.user,
+        author_name=display_name[:40],
         body=body[:500],
     )
     return JsonResponse({
         'comment': {
-            'name': comment.author_name,
+            'name': comment.display_name,
             'body': comment.body,
             'date': comment.date_display,
         },
