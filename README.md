@@ -54,19 +54,6 @@ python manage.py runserver
 
 ---
 
-## 🔌 백엔드 API
-
-```
-GET  /api/posts/<slug>/comments/   →  { comments: [...], count: N }
-POST /api/posts/<slug>/comments/   ←  { name, body }  →  { comment: {...}, count: N }
-```
-
-- DB(`Comment` 모델)에 영구 저장 — 서버 재시작해도 유지
-- `@csrf_exempt` 처리 — 학습 단순화 목적
-- 운영 환경에서는 인증 + CSRF 토큰 사용 필요
-
----
-
 ## 🛠️ Admin 패널
 
 `/admin/` 경로로 접속, `admin / admin1234`로 로그인.
@@ -77,13 +64,3 @@ POST /api/posts/<slug>/comments/   ←  { name, body }  →  { comment: {...}, c
 - Comment (검토/삭제)
 - DailyEntry, Project
 - Profile + SkillGroup + Education (inline 편집)
-
----
-
-## 💡 학습 흐름과 코드의 매핑
-
-| 학습 자료                                                                               | 사용된 부분                                     |
-| --------------------------------------------------------------------------------------- | ----------------------------------------------- |
-| Django 기초 (Template 상속, `{% extends %}`, `{% include %}`, `{% for %}`, `{% url %}`) | `base.html`, `_navbar.html`, 모든 페이지 템플릿 |
-| JS 심화1 (DOM API, `querySelectorAll`, JS 객체)                                         | 카테고리 칩 토글 + 필터링 (1주차)               |
-| JS 심화2 (`addEventListener`, input 데이터, JSON, fetch)                                | 댓글 GET/POST (2주차)                           |
