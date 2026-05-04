@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block title %}Tech · {{ BRAND_NAME }}{% endblock %}
+
+{% block content %}
+<div class="container">
+
+  <div class="hero-row">
+    <div class="title-stack">
+      <span class="eyebrow">{{ page_eyebrow }}</span>
+      <h1>{{ page_h1 }}<span class="accent">.</span></h1>
+    </div>
+    <div class="searchbar">
+      <span class="searchbar__icon">⌕</span>
+      <input class="searchbar__input" type="text" placeholder="search posts…">
+      <span class="kbd">⌘K</span>
+    </div>
+  </div>
+
+  <div class="category-filter" style="margin-top: var(--s-32)" data-filter-group>
+    <button class="chip chip--accent" data-filter="all">All</button>
+    {% for c in categories %}
+      <button class="chip chip--outline" data-filter="{{ c.slug }}">{{ c.label }}</button>
+    {% endfor %}
+  </div>
+
+  <div class="post-list" style="margin-top: var(--s-32)" data-post-list>
+    {% for post in posts %}
+      <a href="{{ post.get_absolute_url }}"
+         class="post-row"
+         data-category="{{ post.category.slug }}">
+        <span class="post-row__date">{{ post.date_display }}</span>
+        <div class="post-row__content">
+          <span class="post-row__title">{{ post.title }}</span>
+          <span class="post-row__sub">{{ post.subtitle }}</span>
+          <div class="post-row__tags">
+            <span class="chip chip--accent">{{ post.category.label }}</span>
+            {% for tag in post.tags.all %}
+              <span class="chip chip--outline">#{{ tag.label }}</span>
+            {% endfor %}
+          </div>
+        </div>
+        <span class="post-row__read">{{ post.read_minutes }} min</span>
+      </a>
+    {% endfor %}
+  </div>
+
+</div>
+{% endblock %}

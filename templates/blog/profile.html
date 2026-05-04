@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block title %}About · {{ BRAND_NAME }}{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 880px;">
+
+  <div class="profile-hero">
+    <span class="avatar avatar--112">{{ profile.avatar_initials }}</span>
+    <div class="title-stack" style="flex:1; min-width: 240px;">
+      <span class="eyebrow">{{ profile.headline_eyebrow }}</span>
+      <h1>{{ profile.headline }}</h1>
+      <span class="title-stack__sub">{{ profile.role_line }}</span>
+    </div>
+  </div>
+
+  <div style="display:flex; flex-direction:column; gap: var(--s-16); margin-top: var(--s-48)">
+    {% if profile.bio_ko %}
+      <p style="font-size: 18px; color: var(--ink-1); line-height: 1.8; margin: 0;">
+        {{ profile.bio_ko }}
+      </p>
+    {% endif %}
+    {% if profile.bio_en %}
+      <p style="font-size: 18px; color: var(--ink-2); line-height: 1.8; margin: 0;">
+        {{ profile.bio_en }}
+      </p>
+    {% endif %}
+  </div>
+
+  <hr class="note-divider" style="margin: var(--s-48) 0;">
+
+  <section class="profile-section">
+    <span class="eyebrow">02 · SKILLS</span>
+    <div style="display:flex; flex-direction:column; gap: var(--s-12); margin-top: var(--s-12)">
+      {% for group in profile.skill_groups.all %}
+        <div class="skill-row">
+          <span class="skill-row__label">{{ group.label }}</span>
+          <div class="skill-row__chips">
+            {% for skill in group.skill_list %}
+              <span class="chip">{{ skill }}</span>
+            {% endfor %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="profile-section" style="margin-top: var(--s-48)">
+    <span class="eyebrow">03 · EDUCATION</span>
+    <div style="display:flex; flex-direction:column; gap: var(--s-16); margin-top: var(--s-12)">
+      {% for ed in profile.education.all %}
+        <div class="timeline-row">
+          <span class="timeline-row__date">{{ ed.period }}</span>
+          <div>
+            <div class="timeline-row__title">{{ ed.title }}</div>
+            <div class="timeline-row__sub">{{ ed.subtitle }}</div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+
+</div>
+{% endblock %}

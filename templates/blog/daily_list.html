@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}Daily · {{ BRAND_NAME }}{% endblock %}
+
+{% block content %}
+<div class="container">
+
+  <div class="hero-row">
+    <div class="title-stack">
+      <span class="eyebrow">{{ page_eyebrow }}</span>
+      <h1>{{ page_h1 }}<span class="accent">.</span></h1>
+    </div>
+    <div class="searchbar">
+      <span class="searchbar__icon">⌕</span>
+      <input class="searchbar__input" type="text" placeholder="search posts…">
+      <span class="kbd">⌘K</span>
+    </div>
+  </div>
+
+  <div class="category-filter" style="margin-top: var(--s-32)" data-filter-group>
+    <button class="chip chip--accent" data-filter="all">All</button>
+    {% for c in categories %}
+      <button class="chip chip--outline" data-filter="{{ c.slug }}">{{ c.label }}</button>
+    {% endfor %}
+  </div>
+
+  <div class="daily-list" style="margin-top: var(--s-32)" data-post-list>
+    {% for entry in entries %}
+      <a href="#" class="daily-entry" data-category="{{ entry.category.slug }}">
+        <span class="daily-entry__date">{{ entry.date_display }}</span>
+        <div class="daily-entry__content">
+          <div class="daily-entry__cat-row">
+            <span class="chip chip--accent">{{ entry.category.label }}</span>
+            <span class="daily-entry__en">{{ entry.title_en }}</span>
+          </div>
+          <span class="daily-entry__title">{{ entry.title }}</span>
+          <p class="daily-entry__excerpt">{{ entry.excerpt }}</p>
+        </div>
+      </a>
+    {% endfor %}
+  </div>
+
+</div>
+{% endblock %}

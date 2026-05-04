@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ post.title }} · {{ BRAND_NAME }}{% endblock %}
+
+{% block content %}
+<div class="tech-detail__main">
+
+  {# Left: TOC #}
+  <aside class="toc-list">
+    <span class="eyebrow">ON THIS PAGE</span>
+    <div class="toc-list__items">
+      {% for s in sections %}
+        {% if s.kind == 'h2' %}
+          <a href="#{{ s.anchor }}"
+             class="toc-item {% if forloop.first %}toc-item--active{% endif %}"
+             data-toc-link="{{ s.anchor }}">
+            {{ s.text }}
+          </a>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </aside>
+
+  {# Center: Article #}
+  <article class="article">
+    <div class="article__meta-top">
+      <span class="chip chip--accent">{{ post.category.label }}</span>
+      <span class="article__meta-top-text">
+        {{ post.date_display }} · {{ post.read_minutes }} min{% if post.series_label %} · {{ post.series_label }}{% endif %}
+      </span>
+    </div>
+
+    <h1 class="article__title">{{ post.title }}</h1>
+    {% if post.subtitle %}
+      <p class="article__subtitle">{{ post.subtitle }}</p>
+    {% endif %}
+
+    <hr class="note-divider">
+
+    {% for s in sections %}
+      {% if s.kind == 'h2' %}
+        <h2 id="{{ s.anchor }}">{{ s.text }}</h2>
+      {% elif s.kind == 'p' %}
+        <p>{{ s.text|linebreaksbr }}</p>
+      {% elif s.kind == 'code' %}
+        <pre class="code-block">{{ s.text }}</pre>
+      {% endif %}
+    {% endfor %}
+
+    <hr class="note-divider">
+
+    {# 댓글 섹션 — 2주차 fetch + JSON API #}
+    <section class="comments-section" id="comments">
+      <h2 class="comments-heading">
+        comments · <span data-comment-count>0</span>
+      </h2>
+
+      <div class="comment-editor" data-comment-form data-post-slug="{{ post.slug }}">
+        <span class="avatar avatar--32">ME</span>
+        <div class="comment-editor__form">
+          <input type="text" id="comment-author" placeholder="이름"
+                 class="field__input" style="margin-bottom: var(--s-8)">
+          <textarea id="comment-body"
+                    class="comment-editor__textarea"
+                    placeholder="댓글을 남겨주세요…"
+                    rows="3"></textarea>
+          <div class="comment-editor__actions">
+            <button type="button" class="btn btn--primary" data-submit-comment disabled>
+              post →
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div id="comment-list">
+        {# 비워둠 — 2주차 JS가 fetch로 채움 #}
+      </div>
+    </section>
+  </article>
+
+  {# Right: Meta Sidebar #}
+  <aside class="meta-sidebar">
+    <span class="eyebrow">META</span>
+    <div class="meta-list">
+      <div class="meta-row"><span class="meta-row__key">author</span><span class="meta-row__val">{{ BRAND_INITIALS }}</span></div>
+      {% if post.edited_at %}
+        <div class="meta-row"><span class="meta-row__key">edited</span><span class="meta-row__val">{{ post.edited_display }}</span></div>
+      {% endif %}
+      {% if post.views %}
+        <div class="meta-row"><span class="meta-row__key">views</span><span class="meta-row__val">{{ post.views }}</span></div>
+      {% endif %}
+      {% if post.license %}
+        <div class="meta-row"><span class="meta-row__key">license</span><span class="meta-row__val">{{ post.license }}</span></div>
+      {% endif %}
+    </div>
+
+    <hr class="note-divider">
+
+    <span class="eyebrow">SHARE</span>
+    <div class="share-group">
+      <button type="button" class="chip chip--outline" data-share="copy">copy ⎘</button>
+      <button type="button" class="chip chip--outline" data-share="x">x</button>
+      <button type="button" class="chip chip--outline" data-share="rss">rss</button>
+    </div>
+  </aside>
+
+</div>
+{% endblock %}

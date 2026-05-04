@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block title %}Projects · {{ BRAND_NAME }}{% endblock %}
+
+{% block content %}
+<div class="container container--wide">
+
+  <div class="hero-row">
+    <div class="title-stack">
+      <span class="eyebrow">{{ page_eyebrow }}</span>
+      <h1>{{ page_h1 }}</h1>
+      <span class="title-stack__sub">{{ page_subtitle }}</span>
+    </div>
+    <div class="category-filter" data-filter-group>
+      <button class="chip chip--accent" data-filter="all">all</button>
+      <button class="chip chip--outline" data-filter="live">live</button>
+      <button class="chip chip--outline" data-filter="wip">wip</button>
+      <button class="chip chip--outline" data-filter="archive">archive</button>
+    </div>
+  </div>
+
+  <div class="project-grid" style="margin-top: var(--s-32)" data-post-list>
+    {% for p in projects %}
+      <a href="{% if p.external_url %}{{ p.external_url }}{% else %}#{% endif %}"
+         class="project-card"
+         data-category="{{ p.status }}"
+         {% if p.external_url %}target="_blank" rel="noopener"{% endif %}>
+        <div class="project-card__cover">{{ p.name }} · cover</div>
+        <div class="project-card__body">
+          <div class="project-card__meta-top">
+            <span class="project-card__year">{{ p.year }}</span>
+            {% if p.status == 'live' %}
+              <span class="chip chip--accent">{{ p.status_label }}</span>
+            {% elif p.status == 'wip' %}
+              <span class="chip">{{ p.status_label }}</span>
+            {% else %}
+              <span class="chip chip--outline">{{ p.status_label }}</span>
+            {% endif %}
+          </div>
+          <span class="project-card__name">{{ p.name }}</span>
+          <p class="project-card__blurb">{{ p.blurb }}</p>
+          <div class="project-card__tags">
+            {% for tag in p.tag_list %}
+              <span class="chip chip--outline">{{ tag }}</span>
+            {% endfor %}
+          </div>
+        </div>
+      </a>
+    {% empty %}
+      <p class="muted">이 상태의 프로젝트가 없어요.</p>
+    {% endfor %}
+  </div>
+
+</div>
+{% endblock %}
