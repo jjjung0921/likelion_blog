@@ -33,25 +33,54 @@ python manage.py runserver
 
 ---
 
-## 🗄️ 데이터 모델
+## 🔄 View ↔ Template 데이터 흐름
 
-`blog/models.py`에 정의된 모델 (총 9개):
+`blog/views.py`가 template에 넘기는 데이터 + JSON API 스펙. 프론트엔드 구현에 필요한 부분만 정리.
 
-| 모델              | 주요 필드                                                                          | 관계                        |
-| ----------------- | ---------------------------------------------------------------------------------- | --------------------------- |
-| **Tag**           | slug, label                                                                        | M:N ← TechPost              |
-| **Category**      | slug, label, order                                                                 | 1:N → TechPost              |
-| **TechPost**      | slug, title, subtitle, body, read_minutes, views, license, published_at, edited_at | N:1 → Category, M:N → Tag   |
-| **Comment**       | user, author_name, body, created_at                                                | N:1 → TechPost, N:1 → User (nullable) |
-| **DailyCategory** | slug, label, order                                                                 | 1:N → DailyEntry            |
-| **DailyEntry**    | slug, title, title_en, excerpt, published_at                                       | N:1 → DailyCategory         |
-| **Project**       | slug, name, blurb, year, status, tags, external_url, order                         | —                           |
-| **Profile**       | display_name, headline, role_line, bio_ko, bio_en                                  | 1:N → SkillGroup, Education |
-| **SkillGroup**    | profile, label, skills                                                             | N:1 → Profile               |
-| **Education**     | profile, period, title, subtitle                                                   | N:1 → Profile               |
+### 모든 페이지 자동 주입
 
-> `Comment`는 로그인된 사용자만 작성 가능 (POST 시 `user` FK 자동 연결, `author_name`은 표시 캐시).
-> 기존 익명 댓글(인증 도입 전)은 `user=None`으로 보존돼 `author_name`만 표시됩니다.
+`blog/context_processors.py:site_meta` + Django auth middleware에서 모든 template에 자동으로 들어옵니다.
+
+| 변수 | 타입 | 용도 |
+| --- | --- | --- |
+| `BRAND_NAME`, `BRAND_INITIALS`, `BRAND_EYEBROW`, `FOOTER_LEFT` | str | 헤더·푸터 텍스트 |
+| `NAV_ITEMS` | list[dict: key, label, url_name] | 네비 메뉴 렌더링 |
+| `user` | User \| AnonymousUser | `{% if user.is_authenticated %}` 분기 |
+
+### 페이지별 context
+
+| URL | template | 주요 변수 |
+| --- | --- | --- |
+| `/` | `home.html` | `hero` (dict), `areas` (list[dict]), `featured` (TechPost), `others` (list[TechPost]), `latest_dailies` (list[DailyEntry]) |
+| `/tech/` | `tech_list.html` | `posts` (list[TechPost]), `categories` (list[Category]) |
+| `/tech/<slug>/` | `tech_detail.html` | `post` (TechPost), `sections` (list[dict: kind, text, anchor]) |
+| `/about/` | `profile.html` | `profile` (Profile) |
+| `/projects/` | `projects_list.html` | `projects` (list[Project]), `selected_status` (str) |
+| `/daily/` | `daily_list.html` | `entries` (list[DailyEntry]), `categories` (list[DailyCategory]) |
+| `/login/` | `login.html` | `error` (str), `username` (str, 입력값 유지), `next_url` (str) |
+| `/signup/` | `signup.html` | `errors` (list[str]), `name` (str), `username` (str) |
+
+### JSON API: `/api/posts/<slug>/comments/`
+
+| 메서드 | 인증 | 요청 body | 응답 |
+| --- | --- | --- | --- |
+| GET | 불필요 | — | `{comments: [{name, body, date}], count}` |
+| POST | **필수** (비로그인 401) | `{body: str}` | `{comment: {name, body, date}, count}` |
+
+> POST 시 작성자는 `request.user`로 자동 결정 (클라이언트가 name 안 보냄).
+
+### 객체별 자주 쓰는 속성
+
+template에서 위 변수들에 접근할 때 쓰는 필드/property:
+
+| 객체 | 속성 |
+| --- | --- |
+| **TechPost** | `title`, `subtitle`, `slug`, `body`, `category.label`, `tags.all`, `date_display`, `edited_display`, `read_minutes`, `series_label`, `license`, `views` |
+| **Comment** | `display_name`, `body`, `date_display`, `initials` (모두 property — 로그인/익명 자동 분기) |
+| **Category** / **DailyCategory** | `slug`, `label` (필터 칩) |
+| **Project** | `name`, `blurb`, `year`, `status_label`, `tag_list`, `external_url` |
+| **Profile** | `display_name`, `headline`, `role_line`, `bio_ko`, `bio_en`, `skill_groups.all`, `education.all` |
+| **DailyEntry** | `title`, `excerpt`, `category.label`, `date_display` |
 
 ---
 
