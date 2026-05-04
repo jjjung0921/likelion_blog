@@ -50,7 +50,7 @@ python manage.py runserver
 | **SkillGroup**    | profile, label, skills                                                             | N:1 → Profile               |
 | **Education**     | profile, period, title, subtitle                                                   | N:1 → Profile               |
 
-> 의도적 단순화: `Comment`는 `User`와 연결하지 않고 `author_name` 문자열만 받습니다.
+> `Comment`는 `User`와 연결하지 않고 `author_name` 문자열만 받습니다.
 
 ---
 
