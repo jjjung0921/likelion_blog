@@ -4,7 +4,6 @@
 
 {% block content %}
 <div class="container container--wide">
-
   {# Hero #}
   <section class="home-hero">
     <div class="home-hero__eyebrow-row">
@@ -16,11 +15,13 @@
       <span>{{ hero.h1_line2 }}<span class="accent">.</span></span>
     </h1>
     <p class="home-hero__bio">
-      {{ hero.bio_line1 }}<br>
+      {{ hero.bio_line1 }}<br />
       {{ hero.bio_line2 }}
     </p>
     <div class="home-hero__ctas">
-      <a href="{% url 'tech_list' %}" class="btn btn--primary">최신 글 읽기 →</a>
+      <a href="{% url 'tech_list' %}" class="btn btn--primary"
+        >최신 글 읽기 →</a
+      >
       <a href="{% url 'profile' %}" class="btn btn--ghost">about</a>
       <a href="#" class="btn btn--ghost">RSS</a>
     </div>
@@ -42,21 +43,21 @@
     </div>
     <div class="area-grid">
       {% for area in areas %}
-        <a href="{% url area.url_name %}" class="area-card">
-          <div class="area-card__top">
-            <span class="muted-mono">{{ area.order }}</span>
-            {% if area.badge %}
-              <span class="chip chip--accent">{{ area.badge }}</span>
-            {% else %}
-              <span class="muted-mono">→</span>
-            {% endif %}
-          </div>
-          <div class="area-card__title">
-            <h3>{{ area.name }}</h3>
-            <span class="mono-accent">{{ area.subtitle }}</span>
-          </div>
-          <p class="area-card__desc">{{ area.desc }}</p>
-        </a>
+      <a href="{% url area.url_name %}" class="area-card">
+        <div class="area-card__top">
+          <span class="muted-mono">{{ area.order }}</span>
+          {% if area.badge %}
+          <span class="chip chip--accent">{{ area.badge }}</span>
+          {% else %}
+          <span class="muted-mono">→</span>
+          {% endif %}
+        </div>
+        <div class="area-card__title">
+          <h3>{{ area.name }}</h3>
+          <span class="mono-accent">{{ area.subtitle }}</span>
+        </div>
+        <p class="area-card__desc">{{ area.desc }}</p>
+      </a>
       {% endfor %}
     </div>
   </section>
@@ -68,43 +69,50 @@
         <span class="mono-accent">02</span>
         <h2>오늘의 노트</h2>
       </div>
-      <a href="{% url 'tech_list' %}" class="muted-mono">see all →</a>
+      <a href="{% url 'tech_list' %}" class="muted-mono"
+        >see all →</a
+      >
     </div>
     <div class="home-grid-1-2">
       {% if featured %}
-        <a href="{{ featured.get_absolute_url }}" class="featured-post">
-          <div class="featured-post__cover">{{ featured.title }} · cover</div>
-          <div class="featured-post__body">
-            <div class="featured-post__meta">
-              <span class="chip chip--accent">{{ featured.category.label }}</span>
-              {% if featured.series_label %}
-                <span class="chip chip--outline">{{ featured.series_label }}</span>
-              {% endif %}
-              <span class="muted-mono">{{ featured.date_display }} · {{ featured.read_minutes }} min</span>
-            </div>
-            <h3 class="featured-post__title">{{ featured.title }}</h3>
-            {% if featured.subtitle %}
-              <p class="featured-post__sub">{{ featured.subtitle }}</p>
+      <a href="{{ featured.get_absolute_url }}" class="featured-post">
+        <div class="featured-post__cover">{{ featured.title }} · cover</div>
+        <div class="featured-post__body">
+          <div class="featured-post__meta">
+            <span class="chip chip--accent">{{ featured.category.label }}</span>
+            {% if featured.series_label %}
+            <span class="chip chip--outline">{{ featured.series_label }}</span>
             {% endif %}
-            <span class="mono-accent">이어 읽기 →</span>
+            <span class="muted-mono"
+              >{{ featured.date_display }} · {{ featured.read_minutes }}
+              min</span
+            >
           </div>
-        </a>
+          <h3 class="featured-post__title">{{ featured.title }}</h3>
+          {% if featured.subtitle %}
+          <p class="featured-post__sub">{{ featured.subtitle }}</p>
+          {% endif %}
+          <span class="mono-accent">이어 읽기 →</span>
+        </div>
+      </a>
       {% endif %}
 
       <aside class="latest-list">
         <span class="eyebrow">LATEST · 최근 5편</span>
         {% for post in others %}
-          <a href="{{ post.get_absolute_url }}" class="post-mini">
-            <div class="post-mini__meta">
-              <span class="chip chip--accent">{{ post.category.label }}</span>
-              <span class="muted-mono">{{ post.date_display|slice:"5:" }}</span>
-            </div>
-            <span class="post-mini__title">{{ post.title }}</span>
-          </a>
+        <a
+          href="{% url 'tech_detail' 'design-system-that-fits-the-hand' %}"
+          class="post-mini"
+        >
+          <div class="post-mini__meta">
+            <span class="chip chip--accent">{{ post.category.label }}</span>
+            <span class="muted-mono">{{ post.date_display|slice:"5:" }}</span>
+          </div>
+          <span class="post-mini__title">{{ post.title }}</span>
+        </a>
         {% endfor %}
       </aside>
     </div>
   </section>
-
 </div>
 {% endblock %}
